@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands # Import app_commands
 import asyncio
+import platform
 import yt_dlp
 from dotenv import load_dotenv
 import logging
@@ -597,13 +598,20 @@ if __name__ == "__main__":
     if not TOKEN:
         print("FATAL ERROR: DISCORD_TOKEN environment variable not set.")
     else:
-        # Create downloads directory if it doesn't exist
+        # Crée le dossier de téléchargements s'il n'existe pas
         if not os.path.exists('downloads'):
             os.makedirs('downloads')
 
+        # --- AJOUT IMPORTANT POUR WINDOWS ---
+        # Cette condition résout l'erreur "aiodns needs a SelectorEventLoop"
+        if platform.system() == "Windows":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        # ------------------------------------
+
         try:
             log.info("Starting bot...")
-            bot.run(TOKEN, log_handler=None) # Disable default discord.py logging handler if using basicConfig
+            # Lancez le bot
+            bot.run(TOKEN, log_handler=None)
         except discord.LoginFailure:
             log.error("Login failed: Invalid Discord Token. Please check your .env file.")
         except Exception as e:
